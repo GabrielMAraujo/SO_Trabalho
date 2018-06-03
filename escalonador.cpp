@@ -66,7 +66,18 @@ void escalonador::VerificaQuantum(){
     
     //Verificação por final do processo
     if(waitpid(pidFork, &status, WNOHANG) > 0){
-        cout << "Fim do job" << endl;
+        cout << "Fim do processo" << endl;
+        time_t rawtime;
+        struct tm* timeinfo;
+        
+        time ( &rawtime );
+        timeinfo = localtime ( &rawtime );
+        
+        processoAtual->tempoTermino.horas = timeinfo->tm_hour;
+        processoAtual->tempoTermino.minutos = timeinfo->tm_min;
+        
+        
+        processoAtual->pid = pidFork;
         executando = false;
         esc->processosJaExecutados.push_back(processoAtual);
     }
@@ -79,6 +90,15 @@ void escalonador::ExecutaDaFila(){
         processoAtual = ((Processo*)filaPrioridade.top());
         
         if(processoAtual->pid == 0){
+            
+            time_t rawtime;
+            struct tm* timeinfo;
+            
+            time ( &rawtime );
+            timeinfo = localtime ( &rawtime );
+            
+            processoAtual->tempoInicio.horas = timeinfo->tm_hour;
+            processoAtual->tempoInicio.minutos = timeinfo->tm_min;
     
             //Cria cópia do processo
             pidFork = fork();
@@ -195,17 +215,11 @@ void escalonador::ObtemMsg(){
             if(processosJaExecutados.size() > 0){
                 cout << "Processos executados pelo escalonador: " << endl;
                 
-                cout << "job | arq_exec | hhmm | copias | pri" << endl;
+                cout << "PID | arquivo executável | tempo de submissão | tempo de início | tempo de término" << endl;
                 
                 for (int i = 0; i < processosJaExecutados.size(); i++){
                     
-                    int horas;
-                    int minutos;
-                    
-                    horas = processosJaExecutados[i]->delay / 3600;
-                    minutos = (processosJaExecutados[i]->delay % 3600) / 60;
-                    
-                    cout << processosJaExecutados[i]->job<< " | " << processosJaExecutados[i]->nomeExecutavel << " | " << horas << ":" << minutos << " | " << " "/*INSERIR NUM COPIAS AQUI*/ << " | " << processosJaExecutados[i]->prioridade << endl;
+                    cout << processosJaExecutados[i]->pid<< " | " << processosJaExecutados[i]->nomeExecutavel << " | " << processosJaExecutados[i]->tempoSubmissao.horas << ":" << processosJaExecutados[i]->tempoSubmissao.minutos << " | " << processosJaExecutados[i]->tempoInicio.horas << ":" << processosJaExecutados[i]->tempoInicio.minutos << " | " << processosJaExecutados[i]->tempoTermino.horas << ":" << processosJaExecutados[i]->tempoTermino.minutos<< endl;
                 }
             }
             

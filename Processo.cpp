@@ -5,6 +5,15 @@ Processo::Processo(long int _delay, int _prioridade, string _nomeExecutavel, int
     prioridade = _prioridade;
     nomeExecutavel = _nomeExecutavel;
     job = _job;
+    
+    time_t rawtime;
+    struct tm* timeinfo;
+    
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+    
+    tempoSubmissao.horas = timeinfo->tm_hour;
+    tempoSubmissao.minutos = timeinfo->tm_min;
 }
 
 //Recalcular prioridade do processo

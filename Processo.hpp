@@ -3,10 +3,16 @@
 
 #include <iostream>
 #include <string>
+#include <time.h>
 
 #endif /* Processo_hpp */
 
 using namespace std;
+
+typedef struct tempo{
+    int horas;
+    int minutos;
+}Tempo;
 
 class Processo{
   
@@ -19,6 +25,9 @@ public:
     string nomeExecutavel;
     int pid = 0;
     int job;
+    Tempo tempoSubmissao;
+    Tempo tempoInicio;
+    Tempo tempoTermino;
     
 private:
     bool diminuindo = true;
