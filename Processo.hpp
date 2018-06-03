@@ -17,7 +17,7 @@ typedef struct tempo{
 class Processo{
   
 public:
-    Processo(long int _delay, int _prioridade, string _nomeExecutavel, int _job);
+    Processo(long int _delay, int _prioridade, string _nomeExecutavel, int _job, int _copiasJob);
     void RecalculaPrioridade();
     
     long int delay;
@@ -28,6 +28,7 @@ public:
     Tempo tempoSubmissao;
     Tempo tempoInicio;
     Tempo tempoTermino;
+    int copiasJob;
     
 private:
     bool diminuindo = true;

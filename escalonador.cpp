@@ -9,7 +9,7 @@ int status;
 int idFila = 0;
 Processo* processoAtual;
 escalonador* esc;
-int contJob = 0;
+int contJob = 1;
 
 struct mensagem{
     int tipo;
@@ -150,7 +150,7 @@ void escalonador::ObtemMsg(){
             
             for(int i = 0; i < mensagemRecebida.mensagem.copias;i++){
                 //Cria novo processo na fila
-                esc->processosAExecutar.push_back(new Processo(segundos, mensagemRecebida.mensagem.prioridade, mensagemRecebida.mensagem.nomearq, contJob));
+                esc->processosAExecutar.push_back(new Processo(segundos, mensagemRecebida.mensagem.prioridade, mensagemRecebida.mensagem.nomearq, contJob, mensagemRecebida.mensagem.copias));
             }
             //Incrementa contador de job
             contJob++;
@@ -225,6 +225,46 @@ void escalonador::ObtemMsg(){
             
             //Fim do escalonador
             exit(1);
+        }
+        
+        else if(mensagemRecebida.mensagem.tipo == 3){
+            //Remover postergado por id do job
+            
+            int idJob = mensagemRecebida.mensagem.horas; //Variável horas guarda o id do job na mensagem, assim com especificado em remove_postergado
+            
+            int contProcessos = 0;
+//            int aux = 0; //guarda o contador de copias do job do primeiro processo com ID igual encontrado
+            
+            //Percorrer lista de processos a executar, procurando pelo id do job passado
+            for(int i = 0; i < processosAExecutar.size(); i++){
+                
+//                cout << "job: " << processosAExecutar[i]->job << endl;
+                
+                if(processosAExecutar[i]->job == idJob){
+                    contProcessos++;
+//                    if(aux == 0){
+//                        aux = processosAExecutar[i]->copiasJob;
+//                    }
+                }
+                
+            }
+            
+            if(contProcessos == 0){
+                cout << "O job com o id " << idJob << " não foi encontrado ou já está em execução." << endl;
+            }
+            
+            else{
+                
+                //Remover processos da lista de processos a executar
+                for(int i = (int)processosAExecutar.size() - 1; i >= 0; i--){
+                    if(processosAExecutar[i]->job == idJob){
+                        processosAExecutar.erase(processosAExecutar.begin() + i);
+                    }
+                }
+                
+                cout << "Job " << idJob << " removido com sucesso." << endl;
+            }
+            
         }
     }
     

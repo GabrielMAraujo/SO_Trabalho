@@ -1,10 +1,11 @@
 #include "Processo.hpp"
 
-Processo::Processo(long int _delay, int _prioridade, string _nomeExecutavel, int _job){
+Processo::Processo(long int _delay, int _prioridade, string _nomeExecutavel, int _job, int _copiasJob){
     delay = _delay;
     prioridade = _prioridade;
     nomeExecutavel = _nomeExecutavel;
     job = _job;
+    copiasJob = _copiasJob;
     
     time_t rawtime;
     struct tm* timeinfo;
