@@ -23,6 +23,11 @@ struct msgem{
     mensagem mensagem;
 };
 
+struct msgem2{
+    long msgt;
+    char textoLista[2000];
+};
+
 int main(int argc, char *argv[]) {
     
     
@@ -48,6 +53,24 @@ int main(int argc, char *argv[]) {
         }
         else{
             cout << "Mensagem enviada com sucesso." << endl;
+
+            int idFila2 = 0;
+            //Tenta acessar fila de msgs para enviar vetor
+            idFila2 = msgget(0x0191, 0x1B0);
+            //Loop até conseguir acesso à fila de mensagens
+            while(idFila2 <= 0){
+                idFila2 = msgget(0x0191, 0x1B0);
+            }
+            
+            cout << "Fila obtida com sucesso" << endl;
+
+            msgem2 mensagemRecebida;
+
+            //Espera receber mensagem
+            msgrcv(idFila2, &mensagemRecebida, sizeof(mensagemRecebida), 0, 0);
+            //Imprimir mensagem
+            cout << mensagemRecebida.textoLista;
+            msgctl(idFila2, IPC_RMID, NULL);
         }
     }
 

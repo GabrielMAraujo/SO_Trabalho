@@ -7,6 +7,7 @@
 #include <sys/msg.h>
 #include <iostream>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -26,7 +27,7 @@ struct msgem{
 
 struct msgem2{
     long msgt;
-    mensagem processosAExecutar[100];
+    char textoLista[2000];
 };
 
 int main(){
@@ -66,12 +67,11 @@ int main(){
 
             //Espera receber mensagem
             msgrcv(idFila2, &mensagemRecebida, sizeof(mensagemRecebida), 0, 0);
-            cout << "oi";
+            cout << "Lista de jobs postergados: " << endl;
             //Imprimir lista
-//            for(int i = 0; i < mensagemRecebida.processosAExecutar.size(); i++){
-//                cout << mensagemRecebida.processosAExecutar[i]->nomeExecutavel << endl;
-//            }
-
+            cout << mensagemRecebida.textoLista;
+            
+            msgctl(idFila2, IPC_RMID, NULL);
         }
     }
 }

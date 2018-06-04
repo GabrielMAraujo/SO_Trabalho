@@ -28,7 +28,7 @@ struct msgem{
 
 struct msgem2{
     long msgt;
-    mensagem processosAExecutar[100];
+    char textoLista[2000];
 };
 
 struct msgem mensagemRecebida;
@@ -166,19 +166,49 @@ void escalonador::ObtemMsg(){
             if(idFila2 > 0){
                 cout << "Criou fila de mensagens de id " << idFila2 << endl;
                 
-                msgem2 mensagemEnviada;
+                struct msgem2 mensagemEnviada;
                 
-                for(int i = 0; i < processosAExecutar.size(); i++){
-                    mensagemEnviada.processosAExecutar[i].horas = processosAExecutar[i]->delay;
-                    mensagemEnviada.processosAExecutar[i].prioridade = processosAExecutar[i]->prioridade;
-                    strcpy(mensagemEnviada.processosAExecutar[i].nomearq,  processosAExecutar[i]->nomeExecutavel.c_str());
+                string msg;
+                
+                if(processosAExecutar.size() == 0){
+                    msg = "Não há processos postergados no escalonador\n";
                 }
-                
+                else{
+                    stringstream ss;
+                    ss << "job | arq_exec | hhmm | copias | pri" << endl;
+                    
+                    int ultimoJob = 0; //Guarda número do último job para não causar reimpressão do mesmo job
+                    
+                    for(int i = 0; i < processosAExecutar.size(); i++){
+                        
+                        
+                        if(processosAExecutar[i]->job != ultimoJob){
+                            
+                            Tempo aux = processosAExecutar[i]->tempoSubmissao;
+                            int auxMin = (int)processosAExecutar[i]->delay / 60;
+                            aux.minutos += auxMin;
+                            if(aux.minutos >=60){
+                                aux.minutos -= 60;
+                                aux.horas++;
+                                if(aux.horas >= 24){
+                                    aux.horas = 0;
+                                }
+                            }
+                            
+                            ss << processosAExecutar[i]->job << " | " << processosAExecutar[i]->nomeExecutavel << " | " << aux.horas << ":" << aux.minutos << " | " << processosAExecutar[i]->copiasJob << " | " << processosAExecutar[i]->prioridade << endl;
+                            
+                            ultimoJob = processosAExecutar[i]->job;
+                        }
+                    }
+                    msg = ss.str();
+                }
                 mensagemEnviada.msgt = 1;
+                strcpy(mensagemEnviada.textoLista, msg.c_str());
+//                cout << "aaa " << mensagemEnviada.textoLista;
                 
                 while((msgsnd(idFila2, &mensagemEnviada, sizeof(mensagemEnviada), IPC_NOWAIT)) < 0){
 //                    cout << "Erro ao enviar mensagem." << endl;
-//                    perror("Erro ao enviar mensagem: ");
+                    perror("Erro ao enviar mensagem: ");
                 }
                 cout << "Mensagem enviada com sucesso." << endl;
                 
@@ -223,6 +253,8 @@ void escalonador::ObtemMsg(){
                 }
             }
             
+            msgctl(idFila, IPC_RMID, NULL);
+            
             //Fim do escalonador
             exit(1);
         }
@@ -249,8 +281,10 @@ void escalonador::ObtemMsg(){
                 
             }
             
+            stringstream ss;
+            
             if(contProcessos == 0){
-                cout << "O job com o id " << idJob << " não foi encontrado ou já está em execução." << endl;
+                ss << "O job com o id " << idJob << " não foi encontrado ou já está em execução." << endl;
             }
             
             else{
@@ -262,7 +296,28 @@ void escalonador::ObtemMsg(){
                     }
                 }
                 
-                cout << "Job " << idJob << " removido com sucesso." << endl;
+                ss << "Job " << idJob << " removido com sucesso." << endl;
+            }
+            
+            int idFila2;
+            
+            //Cria fila de msgs para enviar vetor
+            idFila2 = msgget(0x0191, IPC_CREAT | 0x1B0);
+            if(idFila2 > 0){
+                cout << "Criou fila de mensagens de id " << idFila2 << endl;
+                
+                struct msgem2 mensagemEnviada;
+                mensagemEnviada.msgt = 1;
+                strcpy(mensagemEnviada.textoLista, ss.str().c_str());
+                
+                while((msgsnd(idFila2, &mensagemEnviada, sizeof(mensagemEnviada), IPC_NOWAIT)) < 0){
+                    //                    cout << "Erro ao enviar mensagem." << endl;
+                    perror("Erro ao enviar mensagem: ");
+                }
+                cout << "Mensagem enviada com sucesso." << endl;
+                
+            }else{
+                cout << "Não foi possível criar fila de mensagens" << endl;
             }
             
         }

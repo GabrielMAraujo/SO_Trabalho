@@ -9,6 +9,7 @@
 #include <queue>
 #include <signal.h>
 #include <sys/msg.h>
+#include <sstream>
 
 using namespace std;
 
